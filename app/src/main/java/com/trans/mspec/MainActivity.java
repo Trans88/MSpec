@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private List<Line> mLineList=new ArrayList<>();
     private List<PointValue> mPointViewList=new ArrayList<>();
     private List<AxisValue> mAxisValueList=new ArrayList<>();
-    private List<Integer> mGray =new ArrayList<>(); //灰度值
+    private List <Integer> mGray=new ArrayList<>(); //灰度值
     float[]xDate={400,500,600,700};
 
     private ImageView mImageView;
@@ -307,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 int gray = (int) (0.3 * r + 0.59 * g + 0.11 * b);
                 mGray.add(gray);
             }
-
+            Gray gray=new Gray(mGray);
             initLineChart();
         } else {
             Toast.makeText(this, "failed to get image", Toast.LENGTH_SHORT).show();
