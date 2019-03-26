@@ -31,14 +31,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import lecho.lib.hellocharts.model.Axis;
 import lecho.lib.hellocharts.model.AxisValue;
 import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
-import lecho.lib.hellocharts.model.ValueShape;
 import lecho.lib.hellocharts.view.LineChartView;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -50,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private List<PointValue> mPointViewList=new ArrayList<>();
     private List<AxisValue> mAxisValueList=new ArrayList<>();
     private List <Integer> mGray=new ArrayList<>(); //灰度值
+    private ImageInfo imageInfo=new ImageInfo();
     float[]xDate={400,500,600,700};
 
     private ImageView mImageView;
@@ -94,11 +93,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     /**
      * 初始化图表
      */
-    private void initLineChart() {
+    private void setLineChart() {
         int x=400;
         int y=0;
-        for (int i=0;i<10;i++){
-            y=mGray.get(i);
+        List<List<Integer>> lists = imageInfo.getmGrayList();
+        Log.e("zbyzby", "setLineChart: +lists"+lists.size());
+        List<Integer> grays=new ArrayList<>();
+        for (int i=0;i<lists.size();i++){
+            grays= lists.get(i);
+        }
+        for (int i=0;i<grays.size()&&i<20;i++){
+            Log.e("zbyzby", "setLineChart: +integers"+grays.size());
+            y=grays.get(i);
             PointValue pointValue=new PointValue(x,y);
             mPointViewList.add(pointValue);
             x+=100;
@@ -144,14 +150,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.btn_capture:
                 //清空数据
-                mLineList.clear();
                 LineChartData data=new LineChartData();
                 data.setLines(mLineList);
                 mLineChartView.setLineChartData(data);
-                mGray.clear();
-                mPointViewList.clear();
-                mAxisValueList.clear();
-
                 File outputImage = new File(getExternalCacheDir(),"output_image.jpg");
                 try {
                     if (outputImage.exists()) {
@@ -186,6 +187,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } else {
                     openAlbum();
                 }
+                break;
+            case R.id.btn_save:
+                imageInfo.addImage(mGray);
+                setLineChart();
+                break;
+            case R.id.btn_absorb:
                 break;
         }
     }
@@ -229,6 +236,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         for (int i = 0; i < width; i++) {
                             int y=height/2;
                             int x=i;
+                            Log.e("zbyzby", "onActivityResult: "+x);
                             int color=bitmap.getPixel(x,y);
                             int r=Color.red(color);
                             int g=Color.green(color);
@@ -239,8 +247,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                         //Log.d("zbyzby", "height: "+height+"width"+width+"r  g  b"+r+", "+g+", "+b+"");
                         mImageView.setImageBitmap(bitmap);
-                        initLineChart();
-                        mGray.clear();
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
@@ -307,8 +313,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 int gray = (int) (0.3 * r + 0.59 * g + 0.11 * b);
                 mGray.add(gray);
             }
-            Gray gray=new Gray(mGray);
-            initLineChart();
         } else {
             Toast.makeText(this, "failed to get image", Toast.LENGTH_SHORT).show();
         }

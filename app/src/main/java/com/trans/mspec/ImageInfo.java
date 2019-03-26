@@ -1,19 +1,22 @@
 package com.trans.mspec;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ImageInfo {
-    private List<Gray> mGrayList;
+    private List<List<Integer>> mGrayList=new ArrayList<>();
 
-    public ImageInfo(List<Gray> mGrayList) {
+    public ImageInfo() {
+    }
+    public void addImage(List<Integer> mGray){
+        mGrayList.add(mGray);
+    }
+
+    public void setmGrayList(List<List<Integer>> mGrayList) {
         this.mGrayList = mGrayList;
     }
 
-    public List<Gray> getmGrayList() {
+    public List<List<Integer>> getmGrayList() {
         return mGrayList;
-    }
-
-    public void setmGrayList(List<Gray> mGrayList) {
-        this.mGrayList = mGrayList;
     }
 }
