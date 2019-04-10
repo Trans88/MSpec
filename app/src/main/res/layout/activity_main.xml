@@ -38,24 +38,17 @@
             android:text="打开相册" />
 
         <Button
-            android:id="@+id/btn_source"
-            android:layout_width="0dp"
-            android:layout_height="60dp"
-            android:layout_weight="1"
-            android:text="加入前" />
-
-        <Button
             android:id="@+id/btn_absorb"
             android:layout_width="0dp"
             android:layout_height="60dp"
             android:layout_weight="1"
-            android:text="加入后" />
+            android:text="吸光度" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btn_save"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="保存" />
+    <!--<Button-->
+        <!--android:id="@+id/btn_save"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="60dp"-->
+        <!--android:text="保存" />-->
 
 </LinearLayout>

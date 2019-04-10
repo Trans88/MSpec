@@ -75,12 +75,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mBtn_absorb = findViewById(R.id.btn_absorb);
         mBtn_album = findViewById(R.id.btn_album);
         mBtn_capture = findViewById(R.id.btn_capture);
-        mBtn_source = findViewById(R.id.btn_source);
-        mBtn_save = findViewById(R.id.btn_save);
+//        mBtn_source = findViewById(R.id.btn_source);
+//        mBtn_save = findViewById(R.id.btn_save);
 
         mBtn_capture.setOnClickListener(MainActivity.this);
-        mBtn_save.setOnClickListener(MainActivity.this);
-        mBtn_source.setOnClickListener(MainActivity.this);
+//        mBtn_save.setOnClickListener(MainActivity.this);
+//        mBtn_source.setOnClickListener(MainActivity.this);
         mBtn_album.setOnClickListener(MainActivity.this);
         mBtn_absorb.setOnClickListener(MainActivity.this);
 
@@ -124,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         data.setAxisXBottom(axisX);
         data.setLines(mLineList);
         mLineChartView.setLineChartData(data);
+        data.finish();
     }
 
     /**
@@ -149,10 +150,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_capture:
-                //清空数据
-                LineChartData data=new LineChartData();
-                data.setLines(mLineList);
-                mLineChartView.setLineChartData(data);
+                mLineList.clear();
+                mGray.clear();
+                mPointViewList.clear();
+                mAxisValueList.clear();
                 File outputImage = new File(getExternalCacheDir(),"output_image.jpg");
                 try {
                     if (outputImage.exists()) {
@@ -173,9 +174,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.btn_album:
                 mLineList.clear();
-                LineChartData dataAlbun=new LineChartData();
-                dataAlbun.setLines(mLineList);
-                mLineChartView.setLineChartData(dataAlbun);
                 mGray.clear();
                 mPointViewList.clear();
                 mAxisValueList.clear();
@@ -188,10 +186,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     openAlbum();
                 }
                 break;
-            case R.id.btn_save:
-                imageInfo.addImage(mGray);
-                setLineChart();
-                break;
+//            case R.id.btn_save:
+//                imageInfo.addImage(mGray);
+//                setLineChart();
+//
+//                break;
             case R.id.btn_absorb:
                 break;
         }
