@@ -17,6 +17,35 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
+    <TextView
+        android:id="@+id/sezuobiaoX"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="色坐标X："
+        />
+    <TextView
+        android:id="@+id/sezuobiaoY"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="色坐标Y："
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone">
+        <EditText
+            android:id="@+id/edt_chazhi"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:hint="请输入差值"/>
+        <Button
+            android:id="@+id/btn_queding"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="确定"/>
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,8 +57,14 @@
             android:layout_width="0dp"
             android:layout_height="60dp"
             android:layout_weight="1"
-            android:text="启动摄像头" />
-
+            android:text="启动摄像头"
+            android:visibility="gone"/>
+        <Button
+            android:id="@+id/btn_colorXY"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:text="色坐标"/>
         <Button
             android:id="@+id/btn_album"
             android:layout_width="0dp"

@@ -20,9 +20,11 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -44,33 +46,40 @@ import lecho.lib.hellocharts.util.ChartUtils;
 import lecho.lib.hellocharts.view.LineChartView;
 
 public class LineActivity extends AppCompatActivity implements View.OnClickListener {
-
+    private static final String TAG = "LineActivity";
     public static final int TAKE_PHOTO = 1;
     public static final int CHOOSE_PHOTO = 2;
+    public static final int CHOOSE_PHOTO_FROMCOLOR = 3;
 
     private LineChartView chart;        //显示线条的自定义View
     private LineChartData data;          // 折线图封装的数据类
-    private int numberOfLines = 1;         //线条的数量
+    private int numberOfLines = 2;         //线条的数量
 //    private int maxNumberOfLines = 4;     //最大的线条数据
-    private int numberOfPoints = 76;     //点的数量
+    private int numberOfPoints = 53;     //点的数量
     private int jianju;
 
     private List<Integer> grays = new ArrayList<>();
     private List<List<PointValue>> imagePoints = new ArrayList<>();
+
+    //色坐标
+    private List<Float> daXs=new ArrayList<>();
+    private List<Float> daYs=new ArrayList<>();
 
     float[] mGray = new float[numberOfPoints]; //二维数组，线的数量和点的数量
 
     private boolean hasAxes = true;       //是否有轴，x和y轴
     private boolean hasAxesNames = false;   //是否有轴的名字
     private boolean hasLines = true;       //是否有线（点和点连接的线）
-    private boolean hasPoints = false;       //是否有点（每个值的点）
+    private boolean hasPoints = true;       //是否有点（每个值的点）
     private ValueShape shape = ValueShape.CIRCLE;    //点显示的形式，圆形，正方向，菱形
     private boolean isFilled = false;                //是否是填充
     private boolean hasLabels = false;               //每个点是否有名字
     private boolean isCubic = true;                 //是否是立方的，线条是直线还是弧线
-    private boolean hasLabelForSelected = false;       //每个点是否可以选择（点击效果）
+    private boolean hasLabelForSelected = true;       //每个点是否可以选择（点击效果）
     private boolean pointsHaveDifferentColor=false;           //线条的颜色变换
     private boolean hasGradientToTransparent = false;      //是否有梯度的透明
+    private boolean isInteractive=true;//设置图标是否可以交互
+    private boolean isZoomEnabled=true;//手势缩放
 
     private ImageView mImageView;
     private Button mBtn_capture;
@@ -78,9 +87,13 @@ public class LineActivity extends AppCompatActivity implements View.OnClickListe
     private Button mBtn_source;
     private Button mBtn_absorb;
     private Button mBtn_save;
+    private Button mBtn_queding;
+    private Button mBtn_colorXY;
+    private EditText mEdtChaZhi;
 
     private Uri imgUri;
     private Bitmap bitmap = null;
+    int bochangcha = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -101,12 +114,17 @@ public class LineActivity extends AppCompatActivity implements View.OnClickListe
         mBtn_capture = findViewById(R.id.btn_capture);
 //        mBtn_source = findViewById(R.id.btn_source);
 //        mBtn_save = findViewById(R.id.btn_save);
+        mBtn_queding=findViewById(R.id.btn_queding);
+        mBtn_colorXY=findViewById(R.id.btn_colorXY);
+        mEdtChaZhi=findViewById(R.id.edt_chazhi);
 
         mBtn_capture.setOnClickListener(LineActivity.this);
 //        mBtn_save.setOnClickListener(LineActivity.this);
 //        mBtn_source.setOnClickListener(LineActivity.this);
         mBtn_album.setOnClickListener(LineActivity.this);
         mBtn_absorb.setOnClickListener(LineActivity.this);
+        mBtn_queding.setOnClickListener(LineActivity.this);
+        mBtn_colorXY.setOnClickListener(LineActivity.this);
 
 
         mImageView = findViewById(R.id.img_picture);
@@ -119,9 +137,9 @@ public class LineActivity extends AppCompatActivity implements View.OnClickListe
 
         // Disable viewport recalculations, see toggleCubic() method for more info.
         chart.setViewportCalculationEnabled(false);
-
+        chart.setInteractive(true);
         chart.setZoomType(ZoomType.HORIZONTAL);//设置线条可以水平方向收缩，默认是全方位缩放
-        resetViewport();   //设置折线图的显示大小
+        resetViewport(0,310,350,800);   //设置折线图的显示大小
     }
 
     private void initEvent() {
@@ -132,13 +150,13 @@ public class LineActivity extends AppCompatActivity implements View.OnClickListe
     /**
      * 图像显示大小
      */
-    private void resetViewport() {
+    private void resetViewport(float bottom,float top,float left,float right) {
         // Reset viewport height range to (0,100)
         final Viewport v = new Viewport(chart.getMaximumViewport());
-        v.bottom = 0;
-        v.top = 310;
-        v.left = 350;
-        v.right = 570;
+        v.bottom = bottom;
+        v.top = top;//310
+        v.left = left;//350
+        v.right = right;//800
         chart.setMaximumViewport(v);
         chart.setCurrentViewport(v);
     }
@@ -150,8 +168,9 @@ public class LineActivity extends AppCompatActivity implements View.OnClickListe
         grays.clear();
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
-        jianju=width/76;
-        for (int k = 0; k < width; k += jianju) {
+        jianju=5;
+        Log.e(TAG, "jianju: "+jianju);
+        for (int k = 0; k < width; k ++) {
             int y = height / 2;
             int x = k;
             Log.e("zbyzby", "onActivityResult: " + x);
@@ -160,6 +179,7 @@ public class LineActivity extends AppCompatActivity implements View.OnClickListe
             int g = Color.green(color);
             int b = Color.blue(color);
             int gray = (int) (0.3 * r + 0.59 * g + 0.11 * b);
+            Log.e(TAG, "generateValues: "+gray);
             grays.add(gray);
         }
         for (int j = 0; j < numberOfPoints&&j<grays.size(); ++j) {
@@ -176,12 +196,17 @@ public class LineActivity extends AppCompatActivity implements View.OnClickListe
         List<Line> lines = new ArrayList<Line>();
         //把数据设置到线条上面去
         for (int i = 0; i < numberOfLines; ++i) {
-            int k=380;
+            int k=420;//初始点横坐标
+
             List<PointValue> values = new ArrayList();
 //            values.add(new PointValue(380,30));
             for (int j = 1;j< numberOfPoints; j++) {
                 k=k+jianju;
-                values.add(new PointValue(k, mGray[j]));
+                k=k+bochangcha;
+//                k= (int) (k+bochangcha);
+                PointValue pointValue = new PointValue(k, mGray[j]);
+                Log.e(TAG, "generateData: "+pointValue );
+                values.add(pointValue);
             }
 
             imagePoints.add(values);
@@ -223,10 +248,71 @@ public class LineActivity extends AppCompatActivity implements View.OnClickListe
         chart.setLineChartData(data);
 
     }
+    private void setColorLine(){
+
+        getColorXY();
+        //存放线条对象的集合
+        List<Line> lines = new ArrayList<Line>();
+        //把数据设置到线条上面去
+        for (int i = 0; i < numberOfLines; ++i) {
+            List<PointValue> values = new ArrayList();
+//            values.add(new PointValue(380,30));
+            for (int j = 1;j< daXs.size(); j++) {
+                PointValue pointValue = new PointValue(daXs.get(j), daYs.get(j));
+                Log.e(TAG, "generateData: "+pointValue );
+                values.add(pointValue);
+            }
+
+            imagePoints.add(values);
+
+            Line line = new Line(values);
+            line.setColor(ChartUtils.COLORS[i]);
+            line.setShape(shape);
+            line.setCubic(isCubic);
+            line.setFilled(isFilled);
+            line.setHasLabels(hasLabels);
+            line.setHasLabelsOnlyForSelected(hasLabelForSelected);
+            line.setHasLines(hasLines);
+            line.setHasPoints(hasPoints);
+            if (pointsHaveDifferentColor) {
+                line.setPointColor(ChartUtils.COLORS[(i + 1) % ChartUtils.COLORS.length]);
+            }
+            lines.add(line);
+        }
+
+        data = new LineChartData(lines);
+
+        if (hasAxes) {
+            Axis axisX = new Axis();
+            Axis axisY = new Axis().setHasLines(true);
+            if (hasAxesNames) {
+                axisX.setTextColor(Color.BLACK);//设置x轴字体的颜色
+                axisY.setTextColor(Color.BLACK);//设置y轴字体的颜色
+                axisX.setName("Axis X");
+                axisY.setName("Axis Y");
+            }
+            data.setAxisXBottom(axisX);
+            data.setAxisYLeft(axisY);
+        } else {
+            data.setAxisXBottom(null);
+            data.setAxisYLeft(null);
+        }
+
+        data.setBaseValue(Float.NEGATIVE_INFINITY);
+        chart.setLineChartData(data);
+    }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.btn_colorXY:
+                openAlbumColor();
+                break;
+            case R.id.btn_queding:
+                int i1 = Integer.parseInt(mEdtChaZhi.getText().toString());
+                bochangcha=i1/76;
+                generateData();
+                break;
             case R.id.btn_capture:
                 File outputImage = new File(getExternalCacheDir(), "output_image.jpg");
                 try {
@@ -302,6 +388,11 @@ public class LineActivity extends AppCompatActivity implements View.OnClickListe
         intent.setType("image/*");
         startActivityForResult(intent, CHOOSE_PHOTO);
     }
+    private void openAlbumColor() {
+        Intent intent = new Intent("android.intent.action.GET_CONTENT");
+        intent.setType("image/*");
+        startActivityForResult(intent, CHOOSE_PHOTO_FROMCOLOR);
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
@@ -345,6 +436,14 @@ public class LineActivity extends AppCompatActivity implements View.OnClickListe
                 generateValues();
                 generateData();
                 break;
+            case CHOOSE_PHOTO_FROMCOLOR:
+                if (Build.VERSION.SDK_INT >= 19) {
+                    handleImageOnKitKat(data);
+                    setColorLine();
+                } else {
+                    handleImageBeforeKitKat(data);
+                    setColorLine();
+                }
             default:
                 Log.d("zbyzby", "onActivityResult: 返回失败");
                 break;
@@ -400,6 +499,34 @@ public class LineActivity extends AppCompatActivity implements View.OnClickListe
             cursor.close();
         }
         return path;
+    }
+    public void getColorXY(){
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        List<Double>colorRGB=new ArrayList();
+        double r=0;
+        double g=0;
+        double b=0;
+        double x=0;
+        double y=0;
+        double z=0;
+        float daX=0;
+        float daY=0;
+        for (int k = 0; k < width; k++) {
+            int yZou = height / 2;
+            int xZou = k;
+            int color = bitmap.getPixel(xZou, yZou);
+            r = Color.red(color);
+            g = Color.green(color);
+            b = Color.blue(color);
+            x=2.76892*r+1.751748*g+1.130160*b;
+            y=r+5.590700*g+0.060100*b;
+            z=0.056508*g+5.594292*b;
+            daX= (float) (x/(x+y+z));
+            daY= (float) (x/(x+y+z));
+            daXs.add(daX);
+            daYs.add(daY);
+        }
     }
 
     /**
